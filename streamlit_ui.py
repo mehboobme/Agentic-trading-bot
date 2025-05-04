@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-BASE_URL = "http://localhost:8001"  # Change if backend runs elsewhere
+BASE_URL = "http://localhost:8002"  # Change if backend runs elsewhere
 
 st.set_page_config(
     page_title="Stock Market Multi-Agent Chatbot",
@@ -19,17 +19,25 @@ with st.sidebar:
     uploaded_files = st.file_uploader("Choose files", type=["pdf", "docx"], accept_multiple_files=True)
 
     if st.button("Upload and Ingest"):
-        if not uploaded_files:
-            st.warning("Please upload files first.")
-        else:
-            files = [("files", (f.name, f.read(), f.type)) for f in uploaded_files]
-            with st.spinner("Uploading and processing files..."):
-                response = requests.post(f"{BASE_URL}/upload", files=files)
-                if response.status_code == 200:
-                    st.success("✅ Files uploaded and processed successfully!")
-                else:
-                    st.error("❌ Upload failed: " + response.text)
+        if uploaded_files:
+            files = []
+            for f in uploaded_files:
+                file_data = f.read()
+                if not file_data:
+                    continue  # skip empty files
+                files.append(("files", (getattr(f, "name", "file.pdf"), file_data, f"type")))
 
+            if files:
+                with st.spinner("Uploading and processing files..."):
+                    response = requests.post(f"{BASE_URL}/upload", files=files)
+                    if response.status_code == 200:
+                        st.success("✅ Files uploaded and processed successfully!")
+                    else:
+                        st.error("❌ Upload failed: " + response.text)
+            else:
+                st.warning("Some files were empty or unreadable.")
+
+        
 # Main Panel: Ask a Question
 st.header("🤖 Ask a Question")
 st.markdown("Enter your **stock market-related** question. The chatbot will search the documents and respond intelligently.")
