@@ -7,4 +7,5 @@ langchain_google_genai
 streamlit
 fastapi[all]
 uvicorn
+langchain-pinecone
 -e .
