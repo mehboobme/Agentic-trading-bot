@@ -79,6 +79,7 @@ class DataIngestion:
         pinecone_client = Pinecone(api_key=self.pinecone_api_key)
         
         if not pinecone_client.has_index(self.config["vector_db"]["index_name"]):
+            
             pinecone_client.create_index(
                 name=self.config["vector_db"]["index_name"],
                 dimension=768,
